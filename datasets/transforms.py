@@ -73,7 +73,7 @@ def hflip(image, target):
     return flipped_image, target
 
 
-def resize(image, target, size, max_size=None):
+def resize(image, target, size, max_size=None, fixed=False):
     # size can be min_size (scalar) or (w, h) tuple
 
     def get_size_with_aspect_ratio(image_size, size, max_size=None):
@@ -101,8 +101,9 @@ def resize(image, target, size, max_size=None):
             return size[::-1]
         else:
             return get_size_with_aspect_ratio(image_size, size, max_size)
-
     size = get_size(image.size, size, max_size)
+    if fixed:
+        size = (480, 640)
     rescaled_image = F.resize(image, size)
 
     if target is None:
@@ -189,14 +190,15 @@ class RandomHorizontalFlip(object):
 
 
 class RandomResize(object):
-    def __init__(self, sizes, max_size=None):
+    def __init__(self, sizes, max_size=None, fixed=False):
         assert isinstance(sizes, (list, tuple))
         self.sizes = sizes
         self.max_size = max_size
+        self.fixed = fixed
 
     def __call__(self, img, target=None):
         size = random.choice(self.sizes)
-        return resize(img, target, size, self.max_size)
+        return resize(img, target, size, self.max_size, self.fixed)
 
 
 class RandomPad(object):
